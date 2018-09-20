@@ -69,12 +69,16 @@ app.root.script.create('globals');
                 }
             });
 
-            var asset = new pc.Asset("bit5x5", "font", {
-                url: "Arial/bit5x5.json"
-            });
+            var asset = new pc.Asset("CanvasFont", "font", {});
             app.assets.add(asset);
             asset.resource = cf;
             asset.loaded = true;
+			
+			            var fontAsset = new pc.Asset("bit5x5", "font", {
+                url: "Arial/bit5x5.json"
+            });
+            app.assets.add(fontAsset);
+            app.assets.load(fontAsset);
 		
 			
 			
@@ -220,7 +224,7 @@ var intro = new pc.Entity('Intro');
             var title = new pc.Entity();
             title.addComponent("element", {
                 type: "text",
-                fontAsset: asset,
+                fontAsset: fontAsset,
                 fontSize: elSize,
                 text: firstline,
                 wrapLines: true,
@@ -258,7 +262,7 @@ var intro = new pc.Entity('Intro');
 			var pText = new pc.Entity();
             pText.addComponent("element", {
                 type: "text",
-                fontAsset: asset,
+                fontAsset: fontAsset,
                 fontSize: 32,
                 text: playButtn,
                 wrapLines: true,
@@ -297,7 +301,7 @@ Buttn.script.create('buttonStates');
 			var htpText = new pc.Entity();
             htpText.addComponent("element", {
                 type: "text",
-                fontAsset: asset,
+                fontAsset: fontAsset,
                 fontSize: 32,
                 text: htpButtn,
                 wrapLines: true,
@@ -337,7 +341,7 @@ HowToPlay.script.create('buttonStateHow');
 			var eText = new pc.Entity();
             eText.addComponent("element", {
                 type: "text",
-                fontAsset: asset,
+                fontAsset: fontAsset,
                 fontSize: 32,
                 text: eButtn,
                 wrapLines: true,
@@ -376,7 +380,7 @@ Easy.script.create('buttonStatese');
 			var mText = new pc.Entity();
             mText.addComponent("element", {
                 type: "text",
-                fontAsset: asset,
+                fontAsset: fontAsset,
                 fontSize: 32,
                 text: mButtn,
                 wrapLines: true,
@@ -416,7 +420,7 @@ Medium.script.create('buttonStatesm');
 			var hText = new pc.Entity();
             hText.addComponent("element", {
                 type: "text",
-                fontAsset: asset,
+                fontAsset: fontAsset,
                 fontSize: 32,
                 text: hButtn,
                 wrapLines: true,
@@ -455,7 +459,7 @@ Hard.script.create('buttonStatesh');
 			var bText = new pc.Entity();
             bText.addComponent("element", {
                 type: "text",
-                fontAsset: asset,
+                fontAsset: fontAsset,
                 fontSize: 32,
                 text: bButtn,
                 wrapLines: true,
@@ -492,7 +496,7 @@ Back.script.create('buttonStateBack');
 			var bText1 = new pc.Entity();
             bText1.addComponent("element", {
                 type: "text",
-                fontAsset: asset,
+                fontAsset: fontAsset,
                 fontSize: 32,
                 text: bButtn,
                 wrapLines: true,
@@ -515,7 +519,7 @@ Back1.script.create('buttonStateBack');
 			var Legend = new pc.Entity('Legend');
             Legend.addComponent("element", {
                 type: "text",
-                fontAsset: asset,
+                fontAsset: fontAsset,
                 fontSize: 28,
                 text: ltext,
                 wrapLines: true,
@@ -545,7 +549,7 @@ Back1.script.create('buttonStateBack');
 			var vMessage = new pc.Entity();
             vMessage.addComponent("element", {
                 type: "text",
-                fontAsset: asset,
+                fontAsset: fontAsset,
                 fontSize: 60,
                 text: vtext,
                 wrapLines: true,
@@ -578,7 +582,7 @@ Back1.script.create('buttonStateBack');
 			var goMessage = new pc.Entity();
             goMessage.addComponent("element", {
                 type: "text",
-                fontAsset: asset,
+                fontAsset: fontAsset,
                 fontSize: 60,
                 text: gotext,
                 wrapLines: true,
@@ -611,7 +615,7 @@ Back1.script.create('buttonStateBack');
 			var bText2 = new pc.Entity();
             bText2.addComponent("element", {
                 type: "text",
-                fontAsset: asset,
+                fontAsset: fontAsset,
                 fontSize: 32,
                 text: bButtn,
                 wrapLines: true,
@@ -637,7 +641,7 @@ Back2.script.create('buttonStateBack');
 						var p1life = new pc.Entity('lifep1');
             p1life.addComponent("element", {
                 type: "text",
-                fontAsset: asset,
+                fontAsset: fontAsset,
                 fontSize: 1,
                 text: '',
                 wrapLines: true,
@@ -659,7 +663,7 @@ p1life.script.create('lifep1');
 						var p2life = new pc.Entity('lifep2');
             p2life.addComponent("element", {
                 type: "text",
-                fontAsset: asset,
+                fontAsset: fontAsset,
                 fontSize: 1,
                 text: '',
                 wrapLines: true,
