@@ -13,6 +13,7 @@ Paddleai.prototype.initialize = function() {
 
 // update code called every frame
 Paddleai.prototype.update = function(dt) {
+difficulty = window.gamedifficulty;
     if(difficulty < 0.5)
         {
             aispeed = 0.1;

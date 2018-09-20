@@ -1,0 +1,766 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Pong demo</title>
+	<link href="style.css" rel="stylesheet" />
+	<script src="playcanvas-latest.js"></script>
+	    <script src="http://code.playcanvas.com/ammo.751ec5f.js"></script>
+</head>
+<body>
+	
+	<canvas id="application-canvas"></canvas>
+
+    
+<script>
+    var canvas = document.getElementById("application-canvas");
+	canvas.focus();
+    /* all our JavaScript code goes here */
+	var app = new pc.Application(canvas, {
+    keyboard: new pc.Keyboard(window),
+	elementInput: new pc.ElementInput(canvas)
+});
+
+app.setCanvasFillMode(pc.FILLMODE_FILL_WINDOW);
+app.setCanvasResolution(pc.RESOLUTION_AUTO);
+
+app.scene.ambientLight = new pc.Color(0.2, 0.2, 0.2);
+</script>
+<script src="Lifep1.js"></script>
+<script src="Lifep2.js"></script>
+<script src="p1paddle.js"></script>
+<script src="paddleai.js"></script>
+<script src="ball.js"></script>
+<script src="ButtonStates.js"></script>
+<script src="ButtonStateHow.js"></script>
+<script src="ButtonStateBack.js"></script>
+<script src="ButtonStatesE.js"></script>
+<script src="ButtonStatesM.js"></script>
+<script src="ButtonStatesH.js"></script>
+<script src="globals.js"></script>
+
+	
+<script>
+app.start();
+
+var music = new pc.SoundComponent('music');
+
+app.root.addComponent("script");
+app.root.script.create('globals');
+
+    app.systems.rigidbody.setGravity(0, 0, 0);
+	
+            // Create a canvas font asset
+            const size = 200;
+            const elSize = 200;
+            var cf = new pc.CanvasFont(app, {
+                color: new pc.Color(1, 1, 1), // white
+                fontName: "bit5x5",
+                fontSize: size,
+                width: 400,
+                height: 400,
+                getCharScale: function (code) {
+                    // finger pointing up is a particular long character, use more scaling
+                    if (code === 0x261D) {
+                        return 0.8;
+                    } else {
+                        return -1; // use default scaler
+                    }
+                }
+            });
+
+            var asset = new pc.Asset("bit5x5", "font", {
+                url: "Arial/bit5x5.json"
+            });
+            app.assets.add(asset);
+            asset.resource = cf;
+            asset.loaded = true;
+		
+			
+			
+var camera = new pc.Entity();
+camera.addComponent("camera", {
+    clearColor: new pc.Color(0, 0, 0),
+	projection: pc.PROJECTION_ORTHOGRAPHIC,
+	orthoHeight: 5
+	
+});
+camera.setPosition(0, 0, 1);
+app.root.addChild(camera);
+
+var Game = new pc.Entity('Game');
+
+
+var paddles = new pc.Entity();
+var walls = new pc.Entity();
+
+var pad1 = new pc.Entity();
+pad1.addComponent("model", { type: "box" });
+pad1.setPosition(-7.375,0,0);
+pad1.setLocalScale(0.25, 1.5, 1);
+
+    pad1.addComponent("rigidbody", {
+        type: "kinematic",
+        friction: 0,
+        restitution: 1
+    });
+
+    // ... and a collision component of type 'box'
+    pad1.addComponent("collision", {
+        type: "box",
+        halfExtents: new pc.Vec3(0.125, 0.75, 0.5)
+    });
+
+pad1.addComponent("script");
+pad1.script.create('p1paddle');
+
+
+var pad2 = new pc.Entity();
+pad2.addComponent("model", { type: "box" });
+pad2.setPosition(7.375,0,0);
+pad2.setLocalScale(0.25, 1.5, 1);
+
+pad2.addComponent("script");
+pad2.script.create('paddleai');
+
+    pad2.addComponent("rigidbody", {
+        type: "kinematic",
+        friction: 0,
+        restitution: 1
+    });
+
+    // ... and a collision component of type 'box'
+    pad2.addComponent("collision", {
+        type: "box",
+        halfExtents: new pc.Vec3(0.125, 0.75, 0.5)
+    });
+	
+	
+    var ball = new pc.Entity();
+    ball.addComponent("model", {
+        type: "box",
+        castShadows: true
+    });
+ball.setLocalScale(0.5, 0.5, 0.5);
+	
+    ball.addComponent("rigidbody", {
+        type: "dynamic",
+        friction: 0,
+        restitution: 1,
+		linearDamping: 0,
+		angularDamping: 1,
+		linearFactor: new pc.Vec3(1,1,0),	
+		angularFactor: new pc.Vec3(0,0,0)
+		
+    });
+
+    // ... and a collision component of type 'box'
+    ball.addComponent("collision", {
+        type: "box",
+        halfExtents: new pc.Vec3(0.25, 0.25, 0.25)
+    });
+	
+ball.addComponent("script");
+ball.script.create('ball');
+
+	
+	
+	var topwall = new pc.Entity();
+topwall.addComponent("model", { type: "box" });
+topwall.setPosition(0,3.5,0);
+topwall.setLocalScale(15, 0.2, 0.1);
+
+    topwall.addComponent("rigidbody", {
+        type: "kinematic",
+        friction: 0,
+        restitution: 1
+    });
+
+    // ... and a collision component of type 'box'
+    topwall.addComponent("collision", {
+        type: "box",
+        halfExtents: new pc.Vec3(7.5, 0.1, 0.05)
+    });
+	
+		var botwall = new pc.Entity();
+botwall.addComponent("model", { type: "box" });
+botwall.setPosition(0,-3.5,0);
+botwall.setLocalScale(15, 0.2, 0.1);
+
+    botwall.addComponent("rigidbody", {
+        type: "kinematic",
+        friction: 0,
+        restitution: 1
+    });
+
+    // ... and a collision component of type 'box'
+    botwall.addComponent("collision", {
+        type: "box",
+        halfExtents: new pc.Vec3(7.5, 0.1, 0.05)
+    });
+
+var intro = new pc.Entity('Intro');
+
+
+
+            var scr = new pc.Entity();
+            scr.addComponent("screen", {
+                screenSpace: true,
+                referenceResolution: [1280, 720],
+                scaleMode: pc.SCALEMODE_BLEND,
+                scaleBlend: 1
+            });
+
+
+            // some sample text
+            var firstline = "P O N G";
+
+            cf.createTextures(firstline);
+
+            var title = new pc.Entity();
+            title.addComponent("element", {
+                type: "text",
+                fontAsset: asset,
+                fontSize: elSize,
+                text: firstline,
+                wrapLines: true,
+                autoWidth: true,
+                autoHeight: true,
+                margin: [0,0,0,0],
+                anchor: [0.5,0.5,0.5,0.5],
+                pivot: [0.5, 0.5],
+                alignment: [0.5, 0.5]
+            });
+
+
+            
+	             var Buttn = new pc.Entity('Button');
+                Buttn.addComponent('element', {
+                    type: 'image',
+                    anchor: [0.5,1,0.5,1],
+                    pivot: [0.5, 1],
+                    width: 260,
+                    height: 40,
+                    color: [0.2,0.2,0.2]
+                });
+				Buttn.addComponent('button', {
+                    active: true,
+                    transitionMode: pc.BUTTON_TRANSITION_MODE_TINT_CHANGE,
+                    hoverTint: [1,1,1,0.3],
+
+                    imageEntity: Buttn
+                });
+
+	
+			var playButtn = "PLAY";
+			cf.updateTextures(playButtn);
+	
+			var pText = new pc.Entity();
+            pText.addComponent("element", {
+                type: "text",
+                fontAsset: asset,
+                fontSize: 32,
+                text: playButtn,
+                wrapLines: true,
+                autoWidth: true,
+                autoHeight: true,
+                margin: [0,0,0,0],
+                anchor: [0.5,0.5,0.5,0.5],
+                pivot: [0.5, 0.5],
+                alignment: [0.5, 0.5]
+            });
+			
+			Buttn.addComponent("script");
+Buttn.script.create('buttonStates');
+			
+				var HowToPlay = new pc.Entity('HowToPlay');
+                HowToPlay.addComponent('element', {
+                    type: 'image',
+                    anchor: [0.5,1,0.5,1],
+                    pivot: [0.5, 1],
+                    width: 260,
+                    height: 40,
+                    color: [0.2,0.2,0.2]
+                });
+				HowToPlay.addComponent('button', {
+                    active: true,
+                    transitionMode: pc.BUTTON_TRANSITION_MODE_TINT_CHANGE,
+                    hoverTint: [1,1,1,0.3],
+
+                    imageEntity: HowToPlay
+                });
+
+	
+			var htpButtn = "How To Play";
+			cf.updateTextures(htpButtn);
+	
+			var htpText = new pc.Entity();
+            htpText.addComponent("element", {
+                type: "text",
+                fontAsset: asset,
+                fontSize: 32,
+                text: htpButtn,
+                wrapLines: true,
+                autoWidth: true,
+                autoHeight: true,
+                margin: [0,0,0,0],
+                anchor: [0.5,0.5,0.5,0.5],
+                pivot: [0.5, 0.5],
+                alignment: [0.5, 0.5]
+            });
+			
+						HowToPlay.addComponent("script");
+HowToPlay.script.create('buttonStateHow');
+			
+			
+							var Easy = new pc.Entity('Easy');
+                Easy.addComponent('element', {
+                    type: 'image',
+                    anchor: [0.5,1,0.5,1],
+                    pivot: [0.5, 1],
+                    width: 260,
+                    height: 40,
+                    color: [0.2,0.2,0.2]
+                });
+				Easy.addComponent('button', {
+                    active: true,
+                    transitionMode: pc.BUTTON_TRANSITION_MODE_TINT_CHANGE,
+                    hoverTint: [1,1,1,0.3],
+
+                    imageEntity: Easy
+                });
+
+	
+			var eButtn = "Easy";
+			cf.updateTextures(eButtn);
+	
+			var eText = new pc.Entity();
+            eText.addComponent("element", {
+                type: "text",
+                fontAsset: asset,
+                fontSize: 32,
+                text: eButtn,
+                wrapLines: true,
+                autoWidth: true,
+                autoHeight: true,
+                margin: [0,0,0,0],
+                anchor: [0.5,0.5,0.5,0.5],
+                pivot: [0.5, 0.5],
+                alignment: [0.5, 0.5]
+            });
+			
+									Easy.addComponent("script");
+Easy.script.create('buttonStatese');
+	
+				var Medium = new pc.Entity('Medium');
+                Medium.addComponent('element', {
+                    type: 'image',
+                    anchor: [0.5,1,0.5,1],
+                    pivot: [0.5, 1],
+                    width: 260,
+                    height: 40,
+                    color: [0.2,0.2,0.2]
+                });
+				Medium.addComponent('button', {
+                    active: true,
+                    transitionMode: pc.BUTTON_TRANSITION_MODE_TINT_CHANGE,
+                    hoverTint: [1,1,1,0.3],
+
+                    imageEntity: Medium
+                });
+
+	
+			var mButtn = "Medium";
+			cf.updateTextures(mButtn);
+	
+			var mText = new pc.Entity();
+            mText.addComponent("element", {
+                type: "text",
+                fontAsset: asset,
+                fontSize: 32,
+                text: mButtn,
+                wrapLines: true,
+                autoWidth: true,
+                autoHeight: true,
+                margin: [0,0,0,0],
+                anchor: [0.5,0.5,0.5,0.5],
+                pivot: [0.5, 0.5],
+                alignment: [0.5, 0.5]
+            });
+			
+												Medium.addComponent("script");
+Medium.script.create('buttonStatesm');
+			
+	
+									var Hard = new pc.Entity('Hard');
+                Hard.addComponent('element', {
+                    type: 'image',
+                    anchor: [0.5,1,0.5,1],
+                    pivot: [0.5, 1],
+                    width: 260,
+                    height: 40,
+                    color: [0.2,0.2,0.2],
+                });
+				Hard.addComponent('button', {
+                    active: true,
+                    transitionMode: pc.BUTTON_TRANSITION_MODE_TINT_CHANGE,
+                    hoverTint: [1,1,1,0.3],
+
+                    imageEntity: Hard
+                });
+
+	
+			var hButtn = "Hard";
+			cf.updateTextures(hButtn);
+	
+			var hText = new pc.Entity();
+            hText.addComponent("element", {
+                type: "text",
+                fontAsset: asset,
+                fontSize: 32,
+                text: hButtn,
+                wrapLines: true,
+                autoWidth: true,
+                autoHeight: true,
+                margin: [0,0,0,0],
+                anchor: [0.5,0.5,0.5,0.5],
+                pivot: [0.5, 0.5],
+                alignment: [0.5, 0.5]
+            });
+			
+															Hard.addComponent("script");
+Hard.script.create('buttonStatesh');
+			
+			var Back = new pc.Entity('Back');
+                Back.addComponent('element', {
+                    type: 'image',
+                    anchor: [0.5,1,0.5,1],
+                    pivot: [0.5, 1],
+                    width: 260,
+                    height: 40,
+                    color: [0.2,0.2,0.2]
+                });
+				Back.addComponent('button', {
+                    active: true,
+                    transitionMode: pc.BUTTON_TRANSITION_MODE_TINT_CHANGE,
+                    hoverTint: [0.7,0.7,0.7],
+
+                    imageEntity: Back
+                });
+
+	
+			var bButtn = "Back";
+			cf.updateTextures(bButtn);
+	
+			var bText = new pc.Entity();
+            bText.addComponent("element", {
+                type: "text",
+                fontAsset: asset,
+                fontSize: 32,
+                text: bButtn,
+                wrapLines: true,
+                autoWidth: true,
+                autoHeight: true,
+                margin: [0,0,0,0],
+                anchor: [0.5,0.5,0.5,0.5],
+                pivot: [0.5, 0.5],
+                alignment: [0.5, 0.5]
+            });
+			
+Back.addComponent("script");
+Back.script.create('buttonStateBack');
+
+			var Back1 = new pc.Entity('Back1');
+                Back1.addComponent('element', {
+                    type: 'image',
+                    anchor: [0.5,1,0.5,1],
+                    pivot: [0.5, 1],
+                    width: 260,
+                    height: 40,
+                    color: [0.2,0.2,0.2]
+                });
+				Back1.addComponent('button', {
+                    active: true,
+                    transitionMode: pc.BUTTON_TRANSITION_MODE_TINT_CHANGE,
+                    hoverTint: [0.7,0.7,0.7],
+
+                    imageEntity: Back1
+                });
+
+	
+	
+			var bText1 = new pc.Entity();
+            bText1.addComponent("element", {
+                type: "text",
+                fontAsset: asset,
+                fontSize: 32,
+                text: bButtn,
+                wrapLines: true,
+                autoWidth: true,
+                autoHeight: true,
+                margin: [0,0,0,0],
+                anchor: [0.5,0.5,0.5,0.5],
+                pivot: [0.5, 0.5],
+                alignment: [0.5, 0.5]
+            });
+			
+Back1.addComponent("script");
+Back1.script.create('buttonStateBack');
+
+
+			
+			var ltext = "Space - Release the Ball \n W - Move Up \n S - Move Down ";
+			cf.updateTextures(ltext);
+			
+			var Legend = new pc.Entity('Legend');
+            Legend.addComponent("element", {
+                type: "text",
+                fontAsset: asset,
+                fontSize: 28,
+                text: ltext,
+                wrapLines: true,
+                autoWidth: true,
+                autoHeight: true,
+                margin: [0,0,0,0],
+                anchor: [0.5,0.5,0.5,0.5],
+                pivot: [0.5, 0.5],
+                alignment: [0.5, 0.5]
+            });
+			
+			
+	
+	
+			var Victory = new pc.Entity('Victory');
+			            var vscr = new pc.Entity();
+            vscr.addComponent("screen", {
+                screenSpace: true,
+                referenceResolution: [1280, 720],
+                scaleMode: pc.SCALEMODE_BLEND,
+                scaleBlend: 1
+            });
+			
+						var vtext = "You Win";
+			cf.updateTextures(vtext);
+			
+			var vMessage = new pc.Entity();
+            vMessage.addComponent("element", {
+                type: "text",
+                fontAsset: asset,
+                fontSize: 60,
+                text: vtext,
+                wrapLines: true,
+                autoWidth: true,
+                autoHeight: true,
+                margin: [0,0,0,0],
+                anchor: [0.5,0.5,0.5,0.5],
+                pivot: [0.5, 0.5],
+                alignment: [0.5, 0.5]
+            });
+			
+			Victory.addChild(vscr);
+			vscr.addChild(vMessage);
+			vscr.addChild(Back1);
+			Back1.addChild(bText1);
+
+			
+			var Game_Over = new pc.Entity('Game_Over');
+			            var goscr = new pc.Entity();
+            goscr.addComponent("screen", {
+                screenSpace: true,
+                referenceResolution: [1280, 720],
+                scaleMode: pc.SCALEMODE_BLEND,
+                scaleBlend: 1
+            });
+			
+						var gotext = "You Lose";
+			cf.updateTextures(gotext);
+			
+			var goMessage = new pc.Entity();
+            goMessage.addComponent("element", {
+                type: "text",
+                fontAsset: asset,
+                fontSize: 60,
+                text: gotext,
+                wrapLines: true,
+                autoWidth: true,
+                autoHeight: true,
+                margin: [0,0,0,0],
+                anchor: [0.5,0.5,0.5,0.5],
+                pivot: [0.5, 0.5],
+                alignment: [0.5, 0.5]
+            });
+			
+						var Back2 = new pc.Entity('Back2');
+                Back2.addComponent('element', {
+                    type: 'image',
+                    anchor: [0.5,1,0.5,1],
+                    pivot: [0.5, 1],
+                    width: 260,
+                    height: 40,
+                    color: [0.2,0.2,0.2]
+                });
+				Back2.addComponent('button', {
+                    active: true,
+                    transitionMode: pc.BUTTON_TRANSITION_MODE_TINT_CHANGE,
+                    hoverTint: [0.7,0.7,0.7],
+
+                    imageEntity: Back2
+                });
+
+	
+			var bText2 = new pc.Entity();
+            bText2.addComponent("element", {
+                type: "text",
+                fontAsset: asset,
+                fontSize: 32,
+                text: bButtn,
+                wrapLines: true,
+                autoWidth: true,
+                autoHeight: true,
+                margin: [0,0,0,0],
+                anchor: [0.5,0.5,0.5,0.5],
+                pivot: [0.5, 0.5],
+                alignment: [0.5, 0.5]
+            });
+			
+Back2.addComponent("script");
+Back2.script.create('buttonStateBack');
+			
+			goscr.addChild(goMessage);
+			goscr.addChild(Back2);
+			Back2.addChild(bText2);
+			Game_Over.addChild(goscr);
+			
+			var lif1 = "3";
+			cf.updateTextures(lif1);
+			
+						var p1life = new pc.Entity('lifep1');
+            p1life.addComponent("element", {
+                type: "text",
+                fontAsset: asset,
+                fontSize: 1,
+                text: '',
+                wrapLines: true,
+                autoWidth: true,
+                autoHeight: true,
+                margin: [0,0,0,0],
+                anchor: [0.5,0.5,0.5,0.5],
+                pivot: [0.5, 0.5],
+                alignment: [0.5, 0.5]
+            });
+			
+			p1life.addComponent("script");
+p1life.script.create('lifep1');
+
+			
+						var lif2 = "3";
+			cf.updateTextures(lif2);
+			
+						var p2life = new pc.Entity('lifep2');
+            p2life.addComponent("element", {
+                type: "text",
+                fontAsset: asset,
+                fontSize: 1,
+                text: '',
+                wrapLines: true,
+                autoWidth: true,
+                autoHeight: true,
+                margin: [0,0,0,0],
+                anchor: [0.5,0.5,0.5,0.5],
+                pivot: [0.5, 0.5],
+                alignment: [0.5, 0.5]
+            });
+			
+						p2life.addComponent("script");
+p2life.script.create('lifep2');
+			
+
+			
+			
+			Game.addChild(p1life);
+			Game.addChild(p2life);
+
+paddles.addChild(pad1);
+paddles.addChild(pad2);
+paddles.addChild(ball);
+
+walls.addChild(topwall);
+walls.addChild(botwall);
+
+Game.addChild(paddles);
+Game.addChild(walls);
+
+scr.addChild(title);
+scr.addChild(Buttn);
+Buttn.addChild(pText);
+
+scr.addChild(HowToPlay);
+HowToPlay.addChild(htpText);
+
+scr.addChild(Legend);
+
+scr.addChild(Hard);
+Hard.addChild(hText);
+Hard.setPosition(0.5,-0.2,0);
+
+scr.addChild(Medium);
+Medium.addChild(mText);
+Medium.setPosition(0,-0.2,0);
+
+scr.addChild(Easy);
+Easy.addChild(eText);
+Easy.setPosition(-0.5,-0.2,0);
+
+scr.addChild(Back);
+Back.addChild(bText);
+Back.setPosition(0,-0.5,0);
+
+intro.addChild(scr);
+app.root.addChild(intro);
+
+title.translate(0, 0.5, 0);
+Buttn.setPosition(0,0,0);
+HowToPlay.setPosition(0,-0.2,0);
+p1life.translate(-6,4,0);
+p2life.translate(6,4,0);
+
+
+Back1.setPosition(0,-0.5,0);
+
+Back2.setPosition(0,-0.5,0);
+
+app.root.addChild(Game);
+app.root.addChild(Victory);
+app.root.addChild(Game_Over);
+
+intro.enabled = true;
+Game.enabled = false;
+Hard.enabled = false;
+Medium.enabled = false;
+Easy.enabled = false;
+Back.enabled = false;
+Legend.enabled = false;
+Victory.enabled = false;
+Game_Over.enabled = false;
+
+HowToPlay.element.useInput = true;
+Buttn.element.useInput = true;
+Easy.element.useInput = true;
+Medium.element.useInput = true;
+Hard.element.useInput = true;
+Back.element.useInput = true;
+Back1.element.useInput = true;
+Back2.element.useInput = true;
+
+
+var light = new pc.Entity();
+light.addComponent('light');
+app.root.addChild(light);
+light.rotate(45, 0, 0);
+
+
+	
+	
+</script>
+</body>
+</html>
